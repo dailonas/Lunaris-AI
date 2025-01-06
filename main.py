@@ -8,7 +8,6 @@ import config
 
 from groq import Groq
 from itertools import cycle
-from discord_webhook import DiscordWebhook
 from discord.ext import commands, tasks
 from data.dataHandler import dataHandler
 #------------------------------------------------- Configuration des outils ---------------------------
