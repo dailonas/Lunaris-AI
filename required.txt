@@ -1,0 +1,10 @@
+discord.py
+groq
+discord_webhook
+requests
+string
+os
+time
+ctypes
+string
+itertools
