@@ -12,3 +12,15 @@ class dataHandler(): # Class pour la gestion des datas
         cursor.execute(query, (UserId, msgUser, msgBot,)) # Pour executer les insertions des messages dans la table message !
         cursor.close() # Fermer le curseur après utilisateur ! 'toujours' ! 
         self.con.commit() # Pour sauvegarder les modifications !
+
+    def get_msgUser(self): # Permet de récupérer tous les messages stockés dans la base de données
+        cursor = self.con.cursor() # Communication avec la base de données
+        query = "SELECT msgUser FROM message;" # Requête SQL pour récupérer tous les messages
+        cursor.execute(query) # Execution de la requête
+        cursor.close() # Fin de la communication avec la base de données
+
+    def get_msgBot(self): # Permet de récupérer tous les messages stockés dans la base de données
+        cursor = self.con.cursor() # Communication avec la base de données
+        query = "SELECT msgBot FROM message;" # Requête SQL pour récupérer tous les messages
+        cursor.execute(query) # Execution de la requête
+        cursor.close() # Fin de la communication avec la base de données

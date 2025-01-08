@@ -103,9 +103,9 @@ async def on_message(message): # Detection des messages envoyés aux quelles il 
     keyWord = ["Luna","Lunaris","luna","lunaris"] # Mot clé
     # Programme de reponse pour les serveurs !
     if bot.user.mention in message.content or any(keyword in message.content for keyword in keyWord) or message.reference and message.reference.resolved and message.reference.resolved.author == bot.user:
-        NewPrompte = message.content
-
-        prompt = message.content.replace(bot.user.mention, "").strip()
+        NewPrompte = message.content + data_Handler.get_msgUser() + data_Handler.get_msgBot()
+        # prompt = message.content.replace(bot.user.mention, "").strip()
+        prompt = NewPrompte.replace(bot.user.mention, "").strip()
 
         try: # Vérification du contenu du message pour éviter les répliques
 
