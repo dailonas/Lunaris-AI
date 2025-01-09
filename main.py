@@ -103,9 +103,7 @@ async def on_message(message): # Detection des messages envoyés aux quelles il 
     keyWord = ["Luna","Lunaris","luna","lunaris"] # Mot clé
     # Programme de reponse pour les serveurs !
     if bot.user.mention in message.content or any(keyword in message.content for keyword in keyWord) or message.reference and message.reference.resolved and message.reference.resolved.author == bot.user:
-        NewPrompte = message.content + data_Handler.get_msgUser() + data_Handler.get_msgBot()
-        # prompt = message.content.replace(bot.user.mention, "").strip()
-        prompt = NewPrompte.replace(bot.user.mention, "").strip()
+        prompt = message.content.replace(bot.user.mention, "").strip()
 
         try: # Vérification du contenu du message pour éviter les répliques
 
@@ -118,11 +116,12 @@ async def on_message(message): # Detection des messages envoyés aux quelles il 
                 await message.reply(part)
         except Exception as e:
             return await f"Une erreur c'est produite: {e}"
-
+"""
+# Recuperation des données pour les insérer dans la base de donnée
         UserId = message.author.id # Valeur de l'id de l'utilisateur
         msgUser = message.content # Message de l'utilisateur
         msgBot = part # Reponse du bot (lunaris)
         data_Handler.create_message(UserId, msgUser, msgBot) # Ajout des messages dans la base de données
-
+"""
 #------------------------------------------------- Fin du programme ---------------------------
 bot.run(config.token_discord) # Lancement du program
