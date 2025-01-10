@@ -5,6 +5,7 @@ import ctypes
 import os
 import time
 import config
+import memory
 
 from groq import Groq
 from itertools import cycle
@@ -76,6 +77,7 @@ async def on_ready(): # Lancement du bot !
     # await bot.change_presence(activity=discord.CustomActivity("L'élégance, c'est quand l'intérieur est aussi joli que l'extérieur ")) # Statut du bot de type message !
 
 #------------------ Sous programme de detection et réponse des messages -----
+conversation_manager = memory.memory(max_history=10)
 @bot.event
 async def on_message(message): # Detection des messages envoyés aux quelles il faut repondre
 
@@ -103,19 +105,23 @@ async def on_message(message): # Detection des messages envoyés aux quelles il 
     keyWord = ["Luna","Lunaris","luna","lunaris"] # Mot clé
     # Programme de reponse pour les serveurs !
     if bot.user.mention in message.content or any(keyword in message.content for keyword in keyWord) or message.reference and message.reference.resolved and message.reference.resolved.author == bot.user:
-        prompt = message.content.replace(bot.user.mention, "").strip()
+        
+        userId = message.author.id
+        UserMsg = message.content
+        prompt = conversation_manager.manage_chatting(userId, UserMsg)
+        # prompt = message.content.replace(bot.user.mention, "").strip()
 
         try: # Vérification du contenu du message pour éviter les répliques
 
-            # Génération de la réponse via le modèle d'IA
-            response = generate_groq_response(prompt)
             # Séparation de la réponse en parties pour éviter les dépassements de caractères
-            response_parts = split_message(response)
+            response_parts = split_message(prompt)
             # Envoi de chaque partie de la réponse
             for part in response_parts:
                 await message.reply(part)
+
         except Exception as e:
             return await f"Une erreur c'est produite: {e}"
+
 """
 # Recuperation des données pour les insérer dans la base de donnée
         UserId = message.author.id # Valeur de l'id de l'utilisateur
