@@ -29,7 +29,7 @@ efface() # Clear du terminal !
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
-client = Groq(api_key=config.groq_api_key)
+client = Groq(api_key=config.api_key)
 #------------------------------------------------- Programme de fonctionnement ---------------------------
 
 slowType("Démarrage de la connexion avec le client discord\n")
