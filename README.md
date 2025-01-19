@@ -1,16 +1,13 @@
 # Lunaris-AI
+<p align="center"> 
+Commented source code for creating an Ai type discord application.
+</p>
 
-        userId = message.author.id
-        UserMsg = message.content
+## Requirements
+- Python >= 3.6.3 - discord.py - groq - time and some modules in required.txt file
 
-        # prompt = message.content.replace(bot.user.mention, "").strip()
+## Installation
 
-        try: # Vérification du contenu du message pour éviter les répliques
+## Before Usage
 
-            # Génération de la réponse via le modèle d'IA
-            response = generate_groq_response(prompt)
-            # Séparation de la réponse en parties pour éviter les dépassements de caractères
-            response_parts = split_message(response)
-            # Envoi de chaque partie de la réponse
-            for part in response_parts:
-                await message.reply(part)
+### Credit
