@@ -1,133 +1,127 @@
-#-------------------------------------- Importations des modules --------------------------------
+#-------------------------
+# IMPORT DES MODULES REQUIS
 import discord
-import string
-import ctypes
 import os
 import time
 import config
 import memory
-
 from groq import Groq
 from itertools import cycle
 from discord.ext import commands, tasks
-from data.dataHandler import dataHandler
-#------------------------------------------------- Configuration des outils ---------------------------
-time.sleep(2) # Pause avant le demarrrage du programme
+#-------------------------------------
 
-def efface(): # Fonction pour netoyer le terminal
+
+# ----------------------------------------------------
+# CREATION DES FONCTIONS UTILES
+def efface(): #fonction pour netoyer le terminal
         os.system('cls' if os.name == 'nt' else 'clear')
 
-def slowType(text, delay=0.2): # Fonction qui permet d'afficher du texte de manière lente et progressive
+def slowType(text, delay=0.2): #fonction qui permet d'afficher du texte de manière lente et progressive.
     for char in text:
         print(char, end='', flush=True)
         time.sleep(delay)
 
-data_Handler = dataHandler("database.db") # Permet de faire des requêtes à la base de données
+def split_message(message, max_length=2000): #fonction pour la gestion du nombre de caractère max des reponses.
+    return [message[i:i+max_length] for i in range(0, len(message), max_length)]
+# -------------------------------------------------------------------------------------------------------------
 
-#------------------------------------------------- Configuration des clients ---------------------------
-efface() # Clear du terminal !
+
+#---------------------------------------------
+# CONFIGURATION DES AJUSTEMENTS DE L'APPLICA
+status = cycle([  
+    "Tell them I was happy !",
+    "Les do this !",
+    "The noblest art is that of making others happy !",
+    "Open source project !",
+    "Made by lunaris support !", 
+]) #une liste circlique qui contient tous les differents status(modifiables) de l'applications.
+@tasks.loop(seconds=5)
+async def status_swap(): #fonction pour la lecture de la liste circlique des status.
+    await bot.change_presence(activity=discord.CustomActivity(next(status)))
+#-------------------------------------------------------------------------------------
+
+
+#-----------------------------------
+# CONFICURATION DES CLIENTS API
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 client = Groq(api_key=config.api_key)
-#------------------------------------------------- Programme de fonctionnement ---------------------------
-
-slowType("Démarrage de la connexion avec le client discord\n")
-
-def split_message(message, max_length=2000): # fonction pour la gestion du nombre de caractère max des reponses
-    return [message[i:i+max_length] for i in range(0, len(message), max_length)]
+#------------------------------------
 
 
-def generate_groq_response(prompt): # Gestion de la generation des reponses via un modèle d'ia
-    try:
-        chat_completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Tu est une intelligente assistante, réaliste et qui donne des reponses brèves mais de qualitées.",
-                },
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-            model="llama-3.2-11b-vision-preview"  #"llama3-8b-8192", 
-        )
-        
-        return chat_completion.choices[0].message.content
-    except Exception as e:
-        return f"Une erreur c'est produite: {e}"
-
-    
-#------------------ Sous programme de lancement  ------------------
-status = cycle([ # liste des statuts aléatoire 
-    "Tell them I was happy !",
-    "Les do this !",
-    "The noblest art is that of making others happy !",
-    "Add me for help !",
-    "Made by landhaven !", 
-])
-@tasks.loop(seconds=5) # definition du temps d'attente !
-async def status_swap():# fonction pour la sélection du statut
-    await bot.change_presence(activity=discord.CustomActivity(next(status))) # await bot.change_presence(activity=discord.Game(next(status)))
+#------------------------------------------------
+# EVENEMENTS DE LA MISE EN LIGNE DE L'APPLICATION
+print("Démarrage de la connexion avec le client discord")
 @bot.event
-async def on_ready(): # Lancement du bot !
-    slowType(f'\033[92m{bot.user.name} est en ligne ✔ \033[0m')
-    status_swap.start()  # Statut du bot du type activité !
-    # await bot.change_presence(activity=discord.CustomActivity("L'élégance, c'est quand l'intérieur est aussi joli que l'extérieur ")) # Statut du bot de type message !
+async def on_ready(): #fonction de lancement.
+    print(f'\033[92m{bot.user.name} est en ligne ✔ \033[0m')
+    status_swap.start() #lancement des status.
+#----------------------------------------------------------------
 
-#------------------ Sous programme de detection et réponse des messages -----
-conversation_manager = memory.memory(max_history=10)
+
+#--------------------------------------
+# EVENEMENT PRINCIPAL DE L'APPLICATION
+conversation_manager = memory.memory(max_history=5)
+"""
+    NOTE:
+    Cette partie du code permet de gérer les interactions entre le bot et les utilisateurs.
+    conversation_manager, est la une instance de classe memory qui stocke l'historique
+    des conversations de chaque utilisateur pour une melleiur interaction avec
+    l'application. le nombre maximum de messages à stocker dans l'historique est de cinq
+    (5) par défaut. Vous pouvez le modifier en changeant le cinq (5) par le nombre
+    que vous voulez.
+"""
 @bot.event
-async def on_message(message): # Detection des messages envoyés aux quelles il faut repondre
+async def on_message(message): #fonction de l'evenement pour l'ineraction avec l'application.
+    keyWord = ["Luna","Lunaris","luna","lunaris"]
+    """
+    NOTE:
+    Liste des mots clés pour détecter les messages mentionnant le bot dans un serveur.
+    Modifiez le avec le nom de votre application en respectant le début de chaque mots clés.
+    """
 
-    if message.author.bot: return # condition de base pour tout le programme
+    if message.author.bot: return #(1)
+    """
+    Condition qui verifie que l'utilisateur n'est pas un bot.
+    """
     
-    # Programme pour les messages privés (MP)
-    if isinstance(message.channel, discord.DMChannel):
-        prompt = message.content.replace(bot.user.mention, "").strip()
-
-        try: # Vérification du contenu du message pour éviter les répliques
-
-            # Génération de la réponse via le modèle d'IA
-            response = generate_groq_response(prompt)
-            # Séparation de la réponse en parties pour éviter les dépassements de caractères
-            response_parts = split_message(response)
-            # Envoi de chaque partie de la réponse
-            for part in response_parts:
-                await message.reply(part)
-                return
-
-        except Exception as e: 
-            # Gestion des erreurs
-            return f"Une erreur s'est produite: {e}"
-        
-    keyWord = ["Luna","Lunaris","luna","lunaris"] # Mot clé
-    # Programme de reponse pour les serveurs !
-    if bot.user.mention in message.content or any(keyword in message.content for keyword in keyWord) or message.reference and message.reference.resolved and message.reference.resolved.author == bot.user:
-        
+    if isinstance(message.channel, discord.DMChannel):#(2)
+        """
+        Condition qui verifie que l'utilisateur est dans un canal privé (MP).
+        """
         userId = message.author.id
         UserMsg = message.content
         prompt = conversation_manager.manage_chatting(userId, UserMsg)
-        # prompt = message.content.replace(bot.user.mention, "").strip()
 
-        try: # Vérification du contenu du message pour éviter les répliques
+        try: 
+            response_parts = split_message(prompt) #séparation de la réponse en parties pour éviter les dépassements de caractères.
+            for part in response_parts: #envoi de chaque partie de la réponse.
+                await message.reply(part)
+                return
 
-            # Séparation de la réponse en parties pour éviter les dépassements de caractères
-            response_parts = split_message(prompt)
-            # Envoi de chaque partie de la réponse
-            for part in response_parts:
+        except Exception as e: #gestion des erreurs
+            return f"Une erreur s'est produite: {e}"
+    
+    if bot.user.mention in message.content or any(keyword in message.content for keyword in keyWord) or message.reference and message.reference.resolved and message.reference.resolved.author == bot.user:
+        """
+        Condition qui permet de détecter les messages mentionnant le bot dans un serveur.
+        """
+        userId = message.author.id
+        UserMsg = message.content
+        prompt = conversation_manager.manage_chatting(userId, UserMsg)
+
+        try:
+            response_parts = split_message(prompt) #séparation de la réponse en parties pour éviter les dépassements de caractères.
+            for part in response_parts: #envoi de chaque partie de la réponse.
                 await message.reply(part)
 
-        except Exception as e:
+        except Exception as e: #gestion des erreurs.
             return await f"Une erreur c'est produite: {e}"
+#-------------------------------------------------------------
 
-"""
-# Recuperation des données pour les insérer dans la base de donnée
-        UserId = message.author.id # Valeur de l'id de l'utilisateur
-        msgUser = message.content # Message de l'utilisateur
-        msgBot = part # Reponse du bot (lunaris)
-        data_Handler.create_message(UserId, msgUser, msgBot) # Ajout des messages dans la base de données
-"""
-#------------------------------------------------- Fin du programme ---------------------------
-bot.run(config.token_discord) # Lancement du program
+
+#---------------------------
+# LANCEMENT DE L'APPLICATION
+bot.run(config.application_key)
+#------------------------------

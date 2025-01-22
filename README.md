@@ -3,7 +3,7 @@
 Commented source code for creating an Ai type discord application.
 </p>
 The project is essentially done in French. The comments are therefore in French. But you can get help on the discord support server if necessary.
-<p><b>Support server link:</b></p>
+<p><b>Support server link: https://discord.gg/jqKKNedtQw</b></p>
 
 ## Requirements
 Python >= 3.6.3 ; discord.py >= ; groq >= ; time >= ; And some modules in required.txt file
@@ -24,6 +24,6 @@ pip install -U discord.py
 
 ## Credit:
 ```txt
-- dailonas
+- dailonas (Owner)
 - amalikux (is-mer)
 ```

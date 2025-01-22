@@ -1,34 +1,45 @@
-import config # Importation de la config
-import discord # Importation de la bibliotheque discordpy
+#--------------------------
+# IMPORT DES FICHIER REQUIS
+import config
+import discord 
+from groq import Groq 
+#--------------------
 
-from groq import Groq # Importation du module groq
-client = Groq(api_key=config.api_key) # Création du client pour l'interaction avec l'api groq
-def generate_groq_response(prompt): # Gestion de la generation des reponses via un modèle d'ia
+
+#--------------------------------
+# CLIENT POU INTERAGIR AVEC GROQ
+client = Groq(api_key=config.api_key)
+#-------------------------------------
+
+
+#---------------------------------------------------
+# FONCTION PRINCIPALE POUR LA CONFIGURATION DE L'IA
+def generate_groq_response(prompt): #fonction de gestion de la generation des reponses via un modèle d'ia
     try:
-        # Concaténer tous les éléments de la liste (l'historique de la conversation) en une seule chaîne
-        prompt = " ".join(prompt)
+        prompt = " ".join(prompt) #concaténer tous les éléments de la liste (l'historique de la conversation) en une seule chaîne.
 
-        # Utiliser l'API Groq pour générer une réponse à partir du prompt
-        chat_completion = client.chat.completions.create(
+        chat_completion = client.chat.completions.create( #utiliser l'API Groq pour générer une réponse à partir du prompt.
             messages=[
                 {
                     "role": "system",
-                    "content": "Tu est une intelligente assistante, réaliste et qui donne des reponses brèves mais de qualitées.",
+                    "content": config.system
                 },
                 {
                     "role": "user",
                     "content": prompt,
                 }
             ],
-            model="llama-3.2-11b-vision-preview"  # le modèl de langue utilisé 
+            model=config.model
         )
-        
-        # Retourner la réponse générée
-        return chat_completion.choices[0].message.content
-    except Exception as e: # Retourner un message d'erreur si une exception se produit
+           
+        return chat_completion.choices[0].message.content #retourner la réponse générée.
+    except Exception as e: #gestion des erreurs.
         return f"Une erreur c'est produite: {e}"
+#-------------------------------------------------
 
-# Classe pour gérer les conversations
+
+#-------------------------------------
+# CLASSE DE GESTION DE LA CONVERSATION
 class memory:
     def __init__(self, max_history=5): # Initialise le gestionnaire de conversations.
         # max_history: Le nombre maximum de messages à conserver dans l'historique.
@@ -54,3 +65,4 @@ class memory:
 
     def get_history(self, user_id): # Récupère l'historique de la conversation pour un utilisateur donné.
         return self.conversations.get(user_id, []) # Retourner une liste vide si aucune conversation n'est disponible
+#----------------------------------------------------------------------------------------------------------------------
