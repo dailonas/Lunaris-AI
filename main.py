@@ -62,7 +62,7 @@ async def on_ready(): #fonction de lancement.
 
 #--------------------------------------
 # EVENEMENT PRINCIPAL DE L'APPLICATION
-conversation_manager = memory.memory(max_history=5)
+conversation_manager = memory.memory(max_history=5) # modifiable
 """
     NOTE:
     Cette partie du code permet de gérer les interactions entre le bot et les utilisateurs.
@@ -92,6 +92,7 @@ async def on_message(message): #fonction de l'evenement pour l'ineraction avec l
         """
         userId = message.author.id
         UserMsg = message.content
+        #prompt = conversation_manager.manage_chatting(userId, UserMsg)
         prompt = conversation_manager.manage_chatting(userId, UserMsg)
 
         try: 
