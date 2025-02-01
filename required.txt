@@ -1,10 +1,8 @@
 discord.py
 groq
-requests
-os
-time
-itertools
+
 ---------------------------------------------------------------------------------------------------------------------------------------
 Intaller ces outils avant de lançer votre appliation au rique d'avoir que des erreurs dans votre terminal.
 Notez que certains modules ne sont pas encore utilisé et faudra donc se fier aux nouveau fichier riqured.txt en cas d'une mise à jour.
+(Note à effacer avant de lancer votre appliation)
 ---------------------------------------------------------------------------------------------------------------------------------------
