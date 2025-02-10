@@ -2,6 +2,7 @@
 # IMPORT DES FICHIER REQUIS
 import config
 import discord 
+import datetime
 from groq import Groq 
 #--------------------
 
@@ -46,6 +47,7 @@ class memory:
         
         self.conversations = {}
         self.max_history = max_history
+        self.last_message_time = {} # attribut pour enregistrer l'heure du dernier message reçu pour chaque utilisateur.
 
     def manage_chatting(self, user_id, message_content): # Gère la conversation avec l'utilisateur.
         # message_content: Le contenu du message de l'utilisateur.
@@ -54,14 +56,30 @@ class memory:
             self.conversations[user_id] = []
 
         self.conversations[user_id].append(message_content) # # Ajouter le nouveau message à l'historique
-        
-        #reponse = self.generer_reponse(self.conversations[user_id]) # Générer une réponse
-        reponse = generate_groq_response(self.conversations[user_id])
+        self.last_message_time[user_id] = datetime.datetime.now() # Time de la conversation ou l'initialiser
+ 
+ #------------------------------------- A voir
+        if user_id in self.conversations and len(self.conversations[user_id]) > 10:
+         del self.conversations[user_id][:10] 
+
+        if len(self.conversations[user_id]) > self.max_history:
+         del self.conversations[user_id][:self.max_history]
+#-----------------------------------------
+        reponse = generate_groq_response(self.conversations[user_id]) # Générer une réponse à partir de l'historique de la conversation ou non.
 
         # Mettre à jour l'historique de la conversation avec la réponse générée
         self.conversations[user_id].append(reponse) # Ajouter la réponse à l'historique
-        self.conversations[user_id] = self.conversations[user_id][-self.max_history:] # Limiter l'historique à la taille maximale
+        self.conversations[user_id] = self.conversations[user_id][-self.max_history:] # Limiter l'historique à la taille maximale.
         return reponse
+    
+    def clear_inactive_conversations(self, inactive_time_threshold=3600):
+            current_time = datetime.datetime.now()
+            inactive_users = [user_id for user_id, last_message_time in self.last_message_time.items()
+                if (current_time - last_message_time).total_seconds() > inactive_time_threshold]
+
+            for user_id in inactive_users:
+               del self.conversations[user_id]
+               del self.last_message_time[user_id]
 
     def get_history(self, user_id): # Récupère l'historique de la conversation pour un utilisateur donné.
         return self.conversations.get(user_id, []) # Retourner une liste vide si aucune conversation n'est disponible

@@ -62,24 +62,13 @@ async def on_ready(): #fonction de lancement.
 
 #--------------------------------------
 # EVENEMENT PRINCIPAL DE L'APPLICATION
-conversation_manager = memory.memory(max_history=5) # modifiable
-"""
-    NOTE:
-    Cette partie du code permet de gérer les interactions entre le bot et les utilisateurs.
-    conversation_manager, est la une instance de classe memory qui stocke l'historique
-    des conversations de chaque utilisateur pour une melleiur interaction avec
-    l'application. le nombre maximum de messages à stocker dans l'historique est de cinq
-    (5) par défaut. Vous pouvez le modifier en changeant le cinq (5) par le nombre
-    que vous voulez.
-"""
+conversation_manager = memory.memory(max_history=config.max_history) # management de l'historie des conversations.
+memory_instance = memory() # instance de la classe memory
+memory_instance.clear_inactive_conversations(config.del_history) # nettoyer les conversations inactives après 1 heure (par défaut).
+
 @bot.event
 async def on_message(message): #fonction de l'evenement pour l'ineraction avec l'application.
-    keyWord = ["Luna","Lunaris","luna","lunaris"]
-    """
-    NOTE:
-    Liste des mots clés pour détecter les messages mentionnant le bot dans un serveur.
-    Modifiez le avec le nom de votre application en respectant le début de chaque mots clés.
-    """
+    keyWord = config.keyWord
 
     if message.author.bot: return #(1)
     """
