@@ -10,7 +10,6 @@ from itertools import cycle
 from discord.ext import commands, tasks
 #-------------------------------------
 
-
 # ----------------------------------------------------
 # CREATION DES FONCTIONS UTILES
 def efface(): #fonction pour netoyer le terminal
@@ -28,13 +27,7 @@ def split_message(message, max_length=2000): #fonction pour la gestion du nombre
 
 #---------------------------------------------
 # CONFIGURATION DES AJUSTEMENTS DE L'APPLICA
-status = cycle([  
-    "Tell them I was happy !",
-    "Les do this !",
-    "The noblest art is that of making others happy !",
-    "Open source project !",
-    "Made by lunaris support !", 
-]) #une liste circlique qui contient tous les differents status(modifiables) de l'applications.
+status = cycle(config.cycle) 
 @tasks.loop(seconds=5)
 async def status_swap(): #fonction pour la lecture de la liste circlique des status.
     await bot.change_presence(activity=discord.CustomActivity(next(status)))
@@ -45,35 +38,41 @@ async def status_swap(): #fonction pour la lecture de la liste circlique des sta
 # CONFICURATION DES CLIENTS API
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix=config.prefix, intents=intents)
 client = Groq(api_key=config.api_key)
 #------------------------------------
 
 
 #------------------------------------------------
 # EVENEMENTS DE LA MISE EN LIGNE DE L'APPLICATION
+slowType("POWERED BY DAILONAS..", 0.1)
+time.sleep(1)
+efface()
+slowType("LUNARIS AI - V1.\n", 0.1)
 print("Démarrage de la connexion avec le client discord")
 @bot.event
 async def on_ready(): #fonction de lancement.
     print(f'\033[92m{bot.user.name} est en ligne ✔ \033[0m')
     status_swap.start() #lancement des status.
+    try:
+        synced = await bot.tree.sync()
+        print(f"\033[92mCommandes synchronisées : {len(synced)} commandes ✔\033[0m")
+    except Exception as e:
+        print(f"\033[91mErreur lors de la synchronisation des commandes slash et préfixes : {e}\033[0m")
 #----------------------------------------------------------------
 
 
 #--------------------------------------
 # EVENEMENT PRINCIPAL DE L'APPLICATION
 conversation_manager = memory.memory(max_history=config.max_history) # management de l'historie des conversations.
-memory_instance = memory() # instance de la classe memory
+memory_instance = memory.memory() # instance de la classe memory
 memory_instance.clear_inactive_conversations(config.del_history) # nettoyer les conversations inactives après 1 heure (par défaut).
 
 @bot.event
 async def on_message(message): #fonction de l'evenement pour l'ineraction avec l'application.
     keyWord = config.keyWord
 
-    if message.author.bot: return #(1)
-    """
-    Condition qui verifie que l'utilisateur n'est pas un bot.
-    """
+    if message.author.bot: return #(1) Condition qui verifie que l'utilisateur n'est pas un bot.
     
     if isinstance(message.channel, discord.DMChannel):#(2)
         """
@@ -109,6 +108,64 @@ async def on_message(message): #fonction de l'evenement pour l'ineraction avec l
         except Exception as e: #gestion des erreurs.
             return await f"Une erreur c'est produite: {e}"
 #-------------------------------------------------------------
+
+"""
+#-------------------------- LES SLASH COMMANDS -----------------------
+@bot.tree.command(name="memory", description="Configuration de la memoire.")
+async def latency(interaction: discord.Interaction, value1: str, value2: str):
+    case_one = value1
+    case_two = value2
+    if interaction.author.id not in config.admin:
+        try:
+            await interaction.response.send_message("Vous n'avez pas les permissions pour effectuer cette action.")
+            return
+        except Exception as e:
+            return await f"Une erreur c'est produite: {e}"
+
+        #----------------------------------------------------------------
+@bot.tree.command(name="admin", description="Gérer les administrateur du bot.")
+async def prompt(interaction: discord.Interaction, value: str, value2: int):
+    case_one = value
+    case_two = value2
+    if interaction.author.id not in config.admin:
+        try:
+            await interaction.response.send_message("Vous n'avez pas les permissions pour effectuer cette action.")
+            return
+        except Exception as e:
+            return await f"Une erreur c'est produite: {e}"
+
+    await interaction.response.send_message(f"Le promptre est : `{config.api_key}`")
+
+        #--------------------------------------------------------------------
+@bot.tree.command(name="config", description="Afficher la configuration de l'application.")
+async def prompt(interaction: discord.Interaction):
+    thumbnail = bot.user.avatar
+    synced = await bot.tree.sync()
+    embed = discord.Embed(
+        title=f"Informations sur le serveur : {bot.user.name}",
+        description=f"Description : bot.user.description",
+        color=discord.Color.blue()
+    )
+    embed.add_field(name="**__API & TOKEN CONFIG__**", value=f"Le token : {config.application_key}\nLa clé API: {config.api_key}\nLe modèle de langue: {config.model}", inline=True)
+    embed.add_field(name="**__APP CONFIG__**", value=f"Le préfix: {config.prefix}\nLes admins: {config.admin}", inline=True)
+    embed.add_field(name="**__PERSONALITY CONFIG__**", value=f"Prompt: {config.system}\nMots clés: {config.keyWord}\nLes status: {config.cycle}", inline=True)
+    embed.add_field(name="**__MEMORY CONFIG__**", value=f"Nombre max de message stocké: {config.max_history}\nCycle de netoyage: {config.del_history}", inline=True)
+    embed.set_thumbnail(url=thumbnail)
+    embed.set_footer(text=f"Commandes : {len(synced)}")
+    embed.set_image_url("https://media.discordapp.net/attachments/998966700806508684/1096875217101541416/WhiteLine.png?ex=67b23826&is=67b0e6a6&hm=e6a136d1001590987404ff77d0c52628d77f7f97ca11d0d50a47aa964cdb433e&=&format=webp&quality=lossless&width=1441&height=18")
+    if interaction.author.id not in config.admin:
+        try:
+            await interaction.response.send_message("Vous n'avez pas les permissions pour effectuer cette action.")
+            return
+        except Exception as e:
+            return await f"Une erreur c'est produite: {e}"
+    elif interaction.author.id in config.admin:
+        try:
+            await interaction.response.send_message(embed=embed)
+        except Exception as e:
+            return await f"Une erreur c'est produite: {e}"
+""" # NOTE: Cette partie n'est pas encore termié (n'y touché pas pour limité les erreurs)
+#----------------------------------------------------------------------------------
 
 
 #---------------------------

@@ -1,7 +1,6 @@
 #--------------------------
 # IMPORT DES FICHIER REQUIS
 import config
-import discord 
 import datetime
 from groq import Groq 
 #--------------------
@@ -60,10 +59,10 @@ class memory:
  
  #------------------------------------- A voir
         if user_id in self.conversations and len(self.conversations[user_id]) > 10:
-         del self.conversations[user_id][:10] 
+         del self.conversations[user_id][:10]  #supprimer les messages trop anciens pour éviter de surcharger l'historique.
 
         if len(self.conversations[user_id]) > self.max_history:
-         del self.conversations[user_id][:self.max_history]
+         del self.conversations[user_id][:self.max_history] #limiter l'historique à la taille maximale.
 #-----------------------------------------
         reponse = generate_groq_response(self.conversations[user_id]) # Générer une réponse à partir de l'historique de la conversation ou non.
 
