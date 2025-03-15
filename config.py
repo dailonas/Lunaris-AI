@@ -5,7 +5,7 @@ model = "llama-3.2-11b-vision-preview" #par défaut vous utilisérez ce modèle 
 #---------------------------------------------------------------------------------------------------------------
 #------------------------- APP CONFIG --------------------------------------------------------------------------
 prefix = "" #préfix pour l'appel des commands (via les slashs commandes).
-admin = [] #liste des administrateurs (le votre par defaut) du bot(via les slashs commandes)
+admin = [0]*10 #liste des administrateurs (le votre par defaut) du bot(via les slashs commandes)
 #---------------------------------------------------------------------------------------------------------------
 #------------------------- PERSONALITY CONFIG ------------------------------------------------------------------
 system = "Tu est une ami qui repond toujours vrai, même quand ça fait mal." #il defini le Comportement de votre appllication (bot, via les slashs commandes).

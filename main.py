@@ -109,7 +109,6 @@ async def on_message(message): #fonction de l'evenement pour l'ineraction avec l
             return await f"Une erreur c'est produite: {e}"
 #-------------------------------------------------------------
 
-"""
 #-------------------------- LES SLASH COMMANDS -----------------------
 @bot.tree.command(name="memory", description="Configuration de la memoire.")
 async def latency(interaction: discord.Interaction, value1: str, value2: str):
@@ -164,7 +163,7 @@ async def prompt(interaction: discord.Interaction):
             await interaction.response.send_message(embed=embed)
         except Exception as e:
             return await f"Une erreur c'est produite: {e}"
-""" # NOTE: Cette partie n'est pas encore termié (n'y touché pas pour limité les erreurs)
+
 #----------------------------------------------------------------------------------
 
 
